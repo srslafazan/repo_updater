@@ -13,7 +13,7 @@ quiet=true
 # Helpers
 git_checkout() {
   branch=${1:-master}
-  git checkout $branch
+  git checkout $branch --quiet
 }
 
 git_is_unstaged() {
@@ -28,7 +28,7 @@ update_repository() {
   echo; 
   
   cd $base_dirname/$repo_dirname && echo "[$repo_dirname] Starting update..." || echo "[$repo_dirname] failed to initiate (bash error $?)"
-  pwd
+  
   # Check for unstaged changes and add/commit/checkout master
   unstaged="$(git_is_unstaged | echo $?)"
   if [ $unstaged -ne 0 ]; then 
