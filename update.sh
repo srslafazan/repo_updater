@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: async track changes and inform user of failures at finish
+
 base_dirname=$PWD
 
 # Options
@@ -11,6 +13,7 @@ quiet=true
 # Helpers
 git_checkout() {
   branch=${1:-master}
+  git checkout $branch
 }
 
 git_is_unstaged() {
@@ -21,9 +24,11 @@ git_is_unstaged() {
 # @param {$dirname}
 update_repository() {
   repo_dirname="$1"
+ 
+  echo; 
   
   cd $base_dirname/$repo_dirname && echo "[$repo_dirname] Starting update..." || echo "[$repo_dirname] failed to initiate (bash error $?)"
-
+  pwd
   # Check for unstaged changes and add/commit/checkout master
   unstaged="$(git_is_unstaged | echo $?)"
   if [ $unstaged -ne 0 ]; then 
@@ -38,6 +43,7 @@ update_repository() {
   # Pull rebase
   echo "[$repo_dirname] Syncing with remote..."
   git_checkout
+
   git pull --rebase origin master --quiet
   if [ $? -eq 0 ]; then
     echo "[$repo_dirname] Done."
@@ -52,7 +58,7 @@ echo "[Options] sync = $sync"
 echo "[Options] debug = $debug"
 echo "[Options] quiet = $quiet"
 
-echo; echo "[Status] Starting repository updates..."; echo;
+echo; echo "[Status] Starting repository updates...";
 
 if [ $sync == true ]
   then
@@ -60,6 +66,7 @@ if [ $sync == true ]
     update_repository "WebUtilsLibrary"
     update_repository "WebUILibrary"
     update_repository "WebConstantsLibrary"
+    update_repository "WebPortal"
     update_repository "Clients"
     update_repository "Server"
   else
@@ -67,6 +74,7 @@ if [ $sync == true ]
     eval update_repository "WebUtilsLibrary" &
     eval update_repository "WebUILibrary" &
     eval update_repository "WebConstantsLibrary" &
+    eval update_repository "WebPortal" &
     eval update_repository "Clients" &
     eval update_repository "Server"
   wait
